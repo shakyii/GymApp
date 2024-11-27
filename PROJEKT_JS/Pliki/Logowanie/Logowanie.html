@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Login</title>
+    <link rel="stylesheet" href="Logowanie.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Login</h1>
+      <form id="loginForm">
+        <div class="input-group">
+          <input
+            type="text"
+            id="username"
+            name="username"
+            placeholder="Username"
+            required
+          />
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Hasło"
+            required
+          />
+        </div>
+        <input type="submit" id="submitLog" value="Login" />
+        <input
+          type="button"
+          id="submitRej"
+          value="Register"
+          onclick="window.location.href='../Rejestracja.html'"
+        />
+      </form>
+    </div>
+
+    <script src="Logowanie.js"></script>
+  </body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Ćwiczenia</title>
+
+    <style>
+      body {
+        font-family: Verdana, Geneva, Tahoma, sans-serif;
+      }
+      table {
+        width: 80% !important;
+        border-collapse: collapse;
+        margin: 20px auto;
+      }
+
+      table,
+      th,
+      td {
+        border: 1px solid black;
+      }
+
+      th,
+      td {
+        padding: 10px;
+        text-align: left;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      #addExerciseForm {
+        text-align: center;
+        margin-top: 36px;
+        margin-bottom: 72px;
+      }
+      .title {
+        text-align: center;
+        font-weight: bold;
+        font-size: 48px;
+      }
+      #welcomeMessage {
+        font-weight: bold;
+        font-size: 48px;
+      }
+      #logoutButton {
+        display: none;
+        /* height: 30px; */
+        padding: 12px 24px;
+        background-color: green;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      .btn {
+        padding: 12px 24px;
+        background-color: #3498db;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      .del-btn {
+        padding: 12px 24px;
+        background-color: red;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      .header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: -20px;
+      }
+      .table-title {
+        text-align: center;
+      }
+      #exerciseName,
+      #mainMuscleGroup,
+      #sideMuscleGroup,
+      #difficulty {
+        border-radius: 10px;
+        padding: 4px;
+        box-sizing: border-box;
+      }
+      .header-btn-box {
+        display: flex;
+        gap: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <p id="welcomeMessage"></p>
+      <div class="header-btn-box">
+        <button onclick="goToPlans()" class="btn">Plans</button>
+        <button onclick="logout()" id="logoutButton">Logout</button>
+      </div>
+    </div>
+    <hr />
+    <h1 class="title">Exercises</h1>
+
+    <div id="exerciseTable"></div>
+    <h1 class="title">Your Exercises</h1>
+    <form id="addExerciseForm">
+      <h2>Add new exercise</h2>
+      <label for="exerciseName">Name:</label>
+      <input
+        type="text"
+        id="exerciseName"
+        name="exerciseName"
+        required
+      /><br /><br />
+
+      <label for="mainMuscleGroup">Main muscle group:</label>
+      <select id="mainMuscleGroup" name="mainMuscleGroup" required>
+        <option value="chest">Chest</option>
+        <option value="back">Back</option>
+        <option value="shoulders">Shoulders</option>
+        <option value="triceps">Triceps</option>
+        <option value="biceps">Biceps</option>
+        <option value="legs">Legs</option>
+      </select>
+      <br /><br />
+
+      <label for="sideMuscleGroup">Side muscle group:</label>
+      <input
+        type="text"
+        id="sideMuscleGroup"
+        name="sideMuscleGroup"
+        required
+      /><br /><br />
+
+      <label for="difficulty">Difficulty:</label>
+      <select id="difficulty" name="difficulty" required>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option></select
+      ><br /><br />
+
+      <button class="btn" type="button" onclick="addExercise()">
+        Add exercise
+      </button>
+    </form>
+    <div id="userExerciseTable"></div>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        fetch("http://localhost:3000/checkLoginStatus", {
+          method: "GET",
+          credentials: "include",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.loggedIn) {
+              fetch("http://localhost:3000/exercises-html")
+                .then((response) => response.text())
+                .then((html) => {
+                  document.getElementById("exerciseTable").innerHTML = html;
+                  document.getElementById("logoutButton").style.display =
+                    "block";
+
+                  fetch("http://localhost:3000/getUsername", {
+                    method: "GET",
+                    credentials: "include",
+                  })
+                    .then((response) => response.json())
+                    .then((userData) => {
+                      const welcomeMessage =
+                        document.getElementById("welcomeMessage");
+                      welcomeMessage.innerText =
+                        "Welcome, " + userData.username + "!";
+                    })
+                    .catch((error) => {
+                      console.error("Error downloading username:", error);
+                    });
+                })
+                .catch((error) => {
+                  console.error("Error downloading data:", error);
+                });
+
+              fetch("http://localhost:3000/user-exercises-html")
+                .then((response) => response.text())
+                .then((html) => {
+                  document.getElementById("userExerciseTable").innerHTML = html;
+                  document.getElementById("logoutButton").style.display =
+                    "block";
+                })
+                .catch((error) => {
+                  console.error("Error downloading data:", error);
+                });
+            } else {
+              window.location.href = "/Logowanie.html";
+            }
+          })
+          .catch((error) => {
+            console.error("Error checking login status:", error);
+          });
+      });
+      function goToPlans() {
+        window.location.href = "/Plans.html";
+      }
+      function logout() {
+        fetch("http://localhost:3000/logout", {
+          method: "POST",
+          credentials: "include",
+        })
+          .then((response) => {
+            if (response.ok) {
+              console.log("Wylogowano!");
+              window.location.href = "/Logowanie.html";
+            } else {
+              console.error("Error logging out!");
+            }
+          })
+          .catch((error) => {
+            console.error("Error sending request:", error);
+          });
+      }
+
+      function addExercise() {
+        const exerciseName = document.getElementById("exerciseName").value;
+        const mainMuscleGroup =
+          document.getElementById("mainMuscleGroup").value;
+        const sideMuscleGroup =
+          document.getElementById("sideMuscleGroup").value;
+        const difficulty = document.getElementById("difficulty").value;
+
+        const exerciseData = {
+          name: exerciseName,
+          main_muscle_group: mainMuscleGroup,
+          side_muscle_group: sideMuscleGroup,
+          difficulty: difficulty,
+        };
+
+        fetch("http://localhost:3000/addExercise", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(exerciseData),
+          credentials: "include",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              alert("New exercise added successfully!");
+              window.location.reload();
+            } else {
+              alert("Error adding exercises. Try again.");
+            }
+          })
+          .catch((error) => {
+            console.error("Error sending request:", error);
+          });
+      }
+      ///////////////////////////////
+      function deleteExercise(exerciseId) {
+        if (confirm("Do you want to delete this exercise?")) {
+          fetch("http://localhost:3000/deleteExercise", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ id: exerciseId }),
+            credentials: "include",
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                alert("Exercise deleted successfully!");
+                window.location.reload();
+              } else {
+                alert("Error deleting exercise. Try again.");
+              }
+            })
+            .catch((error) => {
+              console.error("Error sending request:", error);
+            });
+        }
+      }
+    </script>
+  </body>
+</html>
